@@ -1,6 +1,6 @@
 ---
 name: orchestration
-description: Routing doctrine for the architect-as-orchestrator pattern — how a session running the smartest model delegates implementation to cheaper cross-vendor lanes to minimize cost. USE WHEN delegating implementation work, choosing between grok-implementer/codex-implementer lanes, writing a spec for a subagent, deciding whether to consult fable-advisor, managing session cost or token spend, or running any multi-task build where the session is the architect.
+description: Routing doctrine for the architect-as-orchestrator pattern — how a session running the smartest model delegates implementation to a cheaper cross-vendor lane to minimize cost. USE WHEN delegating implementation work, choosing between the codex-implementer's Terra/Sol tiers, writing a spec for a subagent, deciding whether to consult fable-advisor, managing session cost or token spend, or running any multi-task build where the session is the architect.
 ---
 
 # Orchestration — the architect's routing doctrine
@@ -19,19 +19,19 @@ The session model is the most expensive lane in the system, on both input and ou
 
 What stays with the architect regardless of cost: decomposition, interface design, hypothesis selection when debugging, spec writing, lane routing, and judging verification evidence. Those tokens are what the premium is for — everything else is a candidate for delegation.
 
-## The lanes
+## The lane
 
-| Lane | Producer | Invoke | Route here when |
+| Tier | Producer | Invoke | Route here when |
 |---|---|---|---|
-| Routine | Grok 4.5 | `grok-implementer` agent | The spec fully determines the outcome: boilerplate, wiring, CRUD, mechanical edits, straightforward features. **Default lane.** Requires the [Grok CLI](https://x.ai/cli). |
-| Cross-vendor | GPT-5.6 Sol (high reasoning) | `codex-implementer` agent | Correctness/completeness is critical enough to want a second implementation, or as the alternative family when the grok lane is unavailable. Requires the codex CLI. |
+| Terra (default) | GPT-5.6 Terra, high reasoning | `codex-implementer` agent | The spec fully determines the outcome: boilerplate, wiring, CRUD, mechanical edits, straightforward features — day-to-day coding. **Default.** |
+| Sol (escalation) | GPT-5.6 Sol, medium reasoning | `codex-implementer` agent | The task is genuinely complex — judgment-heavy design, tricky concurrency, ambiguous requirements — or a Terra attempt on the same spec came back wrong or incomplete. |
 | Judgment | Fable 5 | `fable-advisor` agent | Not an implementation lane. See "Commitment boundaries" below. |
 
-Deciding rule: how much does the outcome depend on judgment the spec can't capture? Little → the default grok lane; you will verify anyway. A lot, and mistakes are costly → race both lanes on the same spec and pick the stronger diff, or keep that piece with the architect.
+Both tiers live behind the single `codex-implementer` agent; the caller's prompt states which tier to use (default Terra — say nothing and you get it) and the agent reports back which one it ran. This all requires the [Codex CLI](https://github.com/openai/codex) installed and authenticated.
 
-Grok vs codex is not a capability ranking — it's a failure-distribution question. Both are non-Anthropic families, so either lane's output gets genuine cross-vendor review from the Claude architect; racing them buys a *third* independent perspective for one extra lane's cost.
+Deciding rule: how much does the outcome depend on judgment the spec can't capture? Little → Terra; you will verify anyway. A lot, and mistakes are costly → flag the task complex and route to Sol, or keep that piece with the architect.
 
-If a lane returns `unavailable` or `timeout`, re-route the same spec to the other lane and say so explicitly in your report — never quietly absorb the substitution. If both CLI lanes are unavailable, implement with a Claude subagent and state the downgrade plainly.
+If the lane returns `unavailable` or `timeout`, retry once, and if it persists implement with a Claude subagent and state the downgrade plainly — never quietly absorb the substitution.
 
 ## The spec contract
 
@@ -47,7 +47,7 @@ A spec you can't finish writing is a signal the decision isn't made yet — that
 
 ## Parallelism
 
-Independent specs (no shared files, no ordering dependency) launch as parallel agents in a single message. Sequential chains and single-file surgery stay serial. For high-stakes work, a pick-the-stronger-diff race — `grok-implementer` and `codex-implementer` on the same spec, architect judges — buys three-vendor confidence for one extra lane's cost.
+Independent specs (no shared files, no ordering dependency) launch as parallel `codex-implementer` agents in a single message. Sequential chains and single-file surgery stay serial.
 
 ## Commitment boundaries
 
