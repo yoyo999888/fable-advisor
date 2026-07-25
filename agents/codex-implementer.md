@@ -71,6 +71,7 @@ ${T:+$T 600} codex exec \
   --model gpt-5.6-terra \
   -c model_reasoning_effort=high \
   --sandbox workspace-write \
+  -c sandbox_workspace_write.network_access=true \
   --skip-git-repo-check \
   --cd "$(pwd)" \
   --output-last-message "$FINAL" \
@@ -81,6 +82,7 @@ ${T:+$T 600} codex exec \
   --model gpt-5.6-sol \
   -c model_reasoning_effort=medium \
   --sandbox workspace-write \
+  -c sandbox_workspace_write.network_access=true \
   --skip-git-repo-check \
   --cd "$(pwd)" \
   --output-last-message "$FINAL" \
@@ -92,6 +94,7 @@ Flag discipline (non-negotiable):
 | Flag | Why |
 |---|---|
 | `--sandbox workspace-write` | Codex writes code, scoped to the working tree. Never `danger-full-access`. |
+| `-c sandbox_workspace_write.network_access=true` | Without this, `workspace-write` still blocks all sockets — including loopback/local-daemon connections indistinguishable from real network access at the sandbox-policy level. This project's local tooling (e.g. `dmf`, which is a thin client talking to a background daemon over a local socket) needs this to self-verify inside the sandbox; without it, codex can write and build code but every `dmf` call fails with `Operation not permitted`, and verification silently falls back to the caller. Still not `danger-full-access` — this only lifts the network/socket restriction, not filesystem or process scope. |
 | `--model gpt-5.6-terra` / `--model gpt-5.6-sol` | Pins the chosen tier explicitly — never rely on the CLI default. |
 | `-c model_reasoning_effort=high` (Terra) / `=medium` (Sol) | Effort is tied to the tier, not chosen independently. |
 | `--skip-git-repo-check` + `--cd "$(pwd)"` | Deterministic working root; works outside git repos. |
